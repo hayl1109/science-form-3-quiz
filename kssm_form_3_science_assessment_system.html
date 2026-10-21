@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSSM Form 3 Science Assessment System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-slate-700 selection:text-white">
+
+    <!-- Header / System Navigation -->
+    <header class="bg-slate-900 border-b border-slate-800 text-white sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 text-white font-bold text-xs uppercase px-2.5 py-1 rounded tracking-widest">KSSM</div>
+                <div>
+                    <h1 class="text-base font-semibold text-slate-100 leading-tight">Form 3 Science Assessment System</h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">Ministry of Education Malaysia Secondary School Curriculum</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleModal('vercelModal')" class="text-xs border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded font-medium transition">
+                    Deployment Guide
+                </button>
+                <button onclick="toggleModal('leaderboardModal')" class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded font-medium transition">
+                    Global Leaderboard
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+        <!-- LOBBY VIEW -->
+        <section id="lobbyView" class="space-y-8">
+            <div class="bg-white border border-slate-200 rounded-lg p-6 md:p-8 shadow-sm">
+                <div class="max-w-3xl">
+                    <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Standardized Academic Assessment Engine</h2>
+                    <p class="mt-2 text-sm text-slate-600 leading-relaxed">
+                        Welcome to the official assessment platform for Form 3 Lower Secondary Science. Select a specific chapter to practice focused domain knowledge or launch the Full Syllabus Mode for a comprehensive exam scenario.
+                    </p>
+                </div>
+
+                <div class="mt-8 border-t border-slate-100 pt-6">
+                    <label for="studentName" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                        Candidate Identification Name <span class="text-red-500">*</span>
+                    </label>
+                    <div class="max-w-md">
+                        <input type="text" id="studentName" placeholder="Enter official full name" required
+                            class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded focus:ring-2 focus:ring-blue-600 focus:border-blue-600 block p-2.5 outline-none transition">
+                        <p id="nameError" class="text-xs text-red-600 mt-1 hidden">Candidate name is required before starting an assessment.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessment Mode Selection -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-slate-900">Select Assessment Module</h3>
+                    <span class="text-xs text-slate-500 font-mono">10 Modules Available (200 Total Test Items)</span>
+                </div>
+
+                <!-- Full Syllabus Card -->
+                <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-lg p-6 mb-6 shadow-sm border border-slate-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                        <div class="inline-block bg-blue-500/20 text-blue-300 text-xs font-semibold px-2.5 py-0.5 rounded border border-blue-500/30 uppercase tracking-wider mb-2">
+                            Comprehensive Exam
+                        </div>
+                        <h4 class="text-xl font-bold">Full Syllabus Evaluation Mode</h4>
+                        <p class="text-xs text-slate-300 mt-1 max-w-xl">
+                            Evaluates mastery across all 10 chapters using a randomized sampling of 50 standard assessment questions.
+                        </p>
+                    </div>
+                    <button onclick="startQuiz('ALL')" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-5 py-2.5 rounded transition whitespace-nowrap">
+                        Initiate Full Exam
+                    </button>
+                </div>
+
+                <!-- Chapter Grid -->
+                <div id="chapterGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- QUIZ EXAM VIEW -->
+        <section id="quizView" class="hidden space-y-6">
+            <!-- Exam Status Bar -->
+            <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <span id="quizModuleBadge" class="text-xs font-semibold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">Module</span>
+                    <h2 id="quizTitle" class="text-lg font-bold text-slate-900 mt-1">Chapter Title</h2>
+                </div>
+                <div class="flex items-center space-x-6 border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0 w-full sm:w-auto justify-between sm:justify-end">
+                    <div class="text-right">
+                        <span class="text-xs text-slate-500 block uppercase font-mono">Elapsed Time</span>
+                        <span id="timerDisplay" class="text-base font-bold font-mono text-slate-800">00:00</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-slate-500 block uppercase font-mono">Progress</span>
+                        <span id="progressDisplay" class="text-base font-bold font-mono text-slate-800">0 / 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Main Question Area -->
+                <div class="lg:col-span-3 bg-white border border-slate-200 rounded-lg p-6 shadow-sm flex flex-col justify-between min-h-[420px]">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                            <span id="questionNumberLabel" class="text-xs font-bold text-slate-500 uppercase tracking-wider">Question 01</span>
+                            <span id="questionChapterLabel" class="text-xs font-medium text-slate-400">Chapter Title</span>
+                        </div>
+                        <p id="questionText" class="text-slate-900 text-base font-medium leading-relaxed mb-6">
+                            Question loading...
+                        </p>
+                        <div id="optionsContainer" class="space-y-3">
+                            <!-- Options dynamically rendered -->
+                        </div>
+                    </div>
+
+                    <!-- Navigation Footer -->
+                    <div class="flex items-center justify-between border-t border-slate-100 pt-6 mt-8">
+                        <button id="prevBtn" onclick="navigateQuestion(-1)" class="border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm font-medium px-4 py-2 rounded transition">
+                            Previous
+                        </button>
+                        <button id="nextBtn" onclick="navigateQuestion(1)" class="bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2 rounded transition">
+                            Next
+                        </button>
+                        <button id="submitBtn" onclick="confirmSubmission()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2 rounded transition hidden">
+                            Submit Examination
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Palette Navigator -->
+                <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm h-fit">
+                    <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Question Palette</h3>
+                    <div id="paletteGrid" class="grid grid-cols-5 gap-2">
+                        <!-- Buttons rendered dynamically -->
+                    </div>
+                    <div class="mt-4 border-t border-slate-100 pt-3 space-y-2 text-xs text-slate-500">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 bg-blue-600 rounded-sm"></span>
+                            <span>Selected</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 bg-slate-700 rounded-sm"></span>
+                            <span>Answered</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 bg-slate-100 border border-slate-300 rounded-sm"></span>
+                            <span>Unanswered</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESULTS VIEW -->
+        <section id="resultsView" class="hidden space-y-8">
+            <div class="bg-white border border-slate-200 rounded-lg p-6 md:p-8 shadow-sm">
+                <div class="border-b border-slate-100 pb-4 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <div>
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Official Assessment Report</span>
+                        <h2 id="resultCandidateName" class="text-2xl font-bold text-slate-900">Candidate Performance</h2>
+                    </div>
+                    <span id="resultModuleTitle" class="text-xs font-mono bg-slate-100 border border-slate-200 px-3 py-1 rounded text-slate-700 self-start md:self-auto">Module</span>
+                </div>
+
+                <!-- Metrics Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-slate-50 border border-slate-200 rounded p-4">
+                        <span class="text-xs font-semibold text-slate-500 uppercase block">Total Score</span>
+                        <span id="metricScore" class="text-2xl font-bold text-slate-900">0 / 0</span>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded p-4">
+                        <span class="text-xs font-semibold text-slate-500 uppercase block">Percentage</span>
+                        <span id="metricPercentage" class="text-2xl font-bold text-slate-900">0%</span>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded p-4">
+                        <span class="text-xs font-semibold text-slate-500 uppercase block">Accuracy</span>
+                        <span id="metricAccuracy" class="text-2xl font-bold text-slate-900">0%</span>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded p-4">
+                        <span class="text-xs font-semibold text-slate-500 uppercase block">Time Elapsed</span>
+                        <span id="metricTime" class="text-2xl font-bold font-mono text-slate-900">00:00</span>
+                    </div>
+                </div>
+
+                <!-- UASA Grade Prediction Banner -->
+                <div class="border border-slate-200 rounded-lg p-6 bg-slate-900 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-mono uppercase text-blue-400 font-semibold tracking-wider">UASA Benchmark Evaluation</span>
+                        <div class="flex items-baseline space-x-3 mt-1">
+                            <h3 id="uasaGrade" class="text-3xl font-extrabold text-white">Grade -</h3>
+                            <span id="uasaLabel" class="text-base text-slate-300 font-medium">(Category)</span>
+                        </div>
+                        <p id="uasaDescription" class="text-xs text-slate-400 mt-1 max-w-xl">Grade description will appear here.</p>
+                    </div>
+                    <div class="flex space-x-3 w-full md:w-auto">
+                        <button onclick="returnToLobby()" class="w-full md:w-auto text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-4 py-2.5 rounded font-medium transition">
+                            Return to Dashboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Itemized Question Review -->
+            <div class="bg-white border border-slate-200 rounded-lg p-6 md:p-8 shadow-sm">
+                <h3 class="text-lg font-bold text-slate-900 mb-6 border-b border-slate-100 pb-3">Detailed Examination Breakdown & Explanations</h3>
+                <div id="reviewContainer" class="space-y-6">
+                    <!-- Reviewed items generated dynamically -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-2">
+            <p>Form 3 KSSM Science Assessment Engine &bull; Academic Year 2026</p>
+            <p class="font-mono">Standardized Curriculum Compliance Verified</p>
+        </div>
+    </footer>
+
+    <!-- MODAL: LEADERBOARD -->
+    <div id="leaderboardModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white border border-slate-200 rounded-lg max-w-2xl w-full p-6 shadow-xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="text-lg font-bold text-slate-900">Global Student Ranking</h3>
+                <button onclick="toggleModal('leaderboardModal')" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+            </div>
+            <div class="overflow-x-auto max-h-96 custom-scrollbar">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-50 text-slate-700 font-semibold uppercase tracking-wider border-b border-slate-200">
+                        <tr>
+                            <th class="px-4 py-3">Rank</th>
+                            <th class="px-4 py-3">Candidate</th>
+                            <th class="px-4 py-3">Module</th>
+                            <th class="px-4 py-3">Score</th>
+                            <th class="px-4 py-3">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody" class="divide-y divide-slate-100">
+                        <!-- Dynamic rows -->
+                    </tbody>
+                </table>
+                <div id="leaderboardEmpty" class="text-center py-8 text-slate-400 text-xs hidden">
+                    No verified leaderboard entries recorded yet.
+                </div>
+            </div>
+            <div class="border-t border-slate-100 pt-3 flex justify-between items-center text-xs">
+                <span id="leaderboardSource" class="text-slate-400 font-mono">Storage: Local Storage</span>
+                <button onclick="toggleModal('leaderboardModal')" class="bg-slate-900 text-white px-4 py-1.5 rounded hover:bg-slate-800 transition">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: VERCEL & LEADERBOARD CONFIGURATION -->
+    <div id="vercelModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white border border-slate-200 rounded-lg max-w-2xl w-full p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="text-lg font-bold text-slate-900">Deployment & Global Leaderboard Setup</h3>
+                <button onclick="toggleModal('vercelModal')" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+            </div>
+            
+            <div class="space-y-4 text-xs text-slate-600 leading-relaxed">
+                <div>
+                    <h4 class="font-bold text-slate-800 text-sm mb-1">1. Deploying to Vercel</h4>
+                    <ol class="list-decimal pl-4 space-y-1">
+                        <li>Save this application single file as <code class="bg-slate-100 text-slate-800 px-1 py-0.5 rounded">index.html</code>.</li>
+                        <li>Push the project folder to a GitHub repository or upload directly to Vercel Dashboard.</li>
+                        <li>Select **Static HTML Site** framework preset and click **Deploy**.</li>
+                    </ol>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-800 text-sm mb-1">2. Setting Up Shared Internet Leaderboard (JSONBin.io)</h4>
+                    <p class="mb-2">By default, rankings save locally. To enable a live global leaderboard for all users online:</p>
+                    <ol class="list-decimal pl-4 space-y-1">
+                        <li>Register a free account at <a href="https://jsonbin.io" target="_blank" class="text-blue-600 underline">JSONBin.io</a>.</li>
+                        <li>Create a new Bin with initial content: <code class="bg-slate-100 text-slate-800 px-1 py-0.5 rounded">[]</code>.</li>
+                        <li>Copy your **Bin ID** and **Master Key** from the API Keys section.</li>
+                        <li>Paste your API details into the setup fields below:</li>
+                    </ol>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 p-4 rounded-lg space-y-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1 uppercase tracking-wider text-[10px]">JSONBin Bin ID</label>
+                        <input type="text" id="cfgBinId" placeholder="e.g., 65f1a2b3c4d5e6f" class="w-full bg-white border border-slate-300 p-2 rounded text-slate-800 font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1 uppercase tracking-wider text-[10px]">JSONBin Master Key / API Key</label>
+                        <input type="password" id="cfgApiKey" placeholder="e.g., $2b$10$..." class="w-full bg-white border border-slate-300 p-2 rounded text-slate-800 font-mono">
+                    </div>
+                    <button onclick="saveApiConfig()" class="bg-blue-600 text-white font-semibold px-4 py-2 rounded hover:bg-blue-700 transition">
+                        Save Global API Credentials
+                    </button>
+                    <p id="apiConfigStatus" class="text-xs text-green-600 font-medium hidden">Credentials configured successfully.</p>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-100 pt-3 text-right">
+                <button onclick="toggleModal('vercelModal')" class="bg-slate-900 text-white px-4 py-1.5 rounded hover:bg-slate-800 transition text-xs">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // CHAPTER DEFINITIONS
+        const CHAPTERS = [
+            { id: 1, title: "Chapter 1: Stimuli and Responses" },
+            { id: 2, title: "Chapter 2: Respiration" },
+            { id: 3, title: "Chapter 3: Transportation" },
+            { id: 4, title: "Chapter 4: Reactivity of Metals" },
+            { id: 5, title: "Chapter 5: Thermochemistry" },
+            { id: 6, title: "Chapter 6: Electricity and Magnetism" },
+            { id: 7, title: "Chapter 7: Energy and Power" },
+            { id: 8, title: "Chapter 8: Radioactivity" },
+            { id: 9, title: "Chapter 9: Space Weather" },
+            { id: 10, title: "Chapter 10: Space Exploration" }
+        ];
+
+        // 20 AUTHENTIC QUESTIONS PER CHAPTER = 200 TOTAL
+        const QUESTION_BANK = {
+            1: [
+                { q: "Which part of the human central nervous system integrates incoming sensory information and coordinates voluntary responses?", options: ["Spinal cord", "Cerebrum", "Cerebellum", "Medulla oblongata"], answer: 1, explanation: "The cerebrum is the largest part of the brain responsible for controlling higher-level voluntary functions, memory, and sensory interpretation." },
+                { q: "What is the primary function of photoreceptors located in the human retina?", options: ["Detect light intensity and color", "Maintain intraocular pressure", "Refract light onto the fovea", "Control the size of the pupil"], answer: 0, explanation: "Retinal photoreceptors (rods and cones) detect light intensity and color, converting light stimuli into nerve impulses." },
+                { q: "Which photoreceptor cells are responsible for vision in low light conditions?", options: ["Cone cells", "Rod cells", "Ganglion cells", "Bipolar cells"], answer: 1, explanation: "Rod cells are highly sensitive to light and enable night or dim-light vision, though they do not perceive color." },
+                { q: "What occurs to the ciliary muscles and suspensory ligaments when viewing a distant object?", options: ["Ciliary muscles contract; suspensory ligaments slacken", "Ciliary muscles relax; suspensory ligaments become taut", "Both contract simultaneously", "Both relax simultaneously"], answer: 1, explanation: "When focusing on distant objects, ciliary muscles relax, pulling suspensory ligaments taut to flatten the lens." },
+                { q: "Which type of plant tropism causes roots to grow towards groundwater sources?", options: ["Thigmotropism", "Positive hydrotropism", "Negative phototropism", "Positive geotropism"], answer: 1, explanation: "Positive hydrotropism refers to the directional growth of root tips toward higher moisture gradients." },
+                { q: "Nastic movements in plants differ from tropic movements because nastic responses are:", options: ["Directional relative to the stimulus", "Independent of stimulus direction", "Permanent growth responses", "Extremely slow chemical adjustments"], answer: 1, explanation: "Nastic movements (e.g., Mimosa pudica folding) are rapid plant responses independent of the direction of the stimulus." },
+                { q: "Which structure in the human ear converts mechanical vibrations into electrical nerve impulses?", options: ["Ossicles", "Tympanic membrane", "Cochlea", "Eustachian tube"], answer: 2, explanation: "The cochlea contains hair cells suspended in fluid that convert mechanical sound waves into sensory electrical signals." },
+                { q: "The optic nerve carries sensory impulses directly from the retina to which part of the central nervous system?", options: ["Cerebellum", "Spinal Cord", "Visual Cortex of the Brain", "Brainstem"], answer: 2, explanation: "The optic nerve transmits nerve signals directly to the visual processing centers of the cerebrum." },
+                { q: "Which eye condition is caused by an uneven curvature of the cornea or lens, causing distorted focusing?", options: ["Myopia", "Hypermetropia", "Astigmatism", "Presbyopia"], answer: 2, explanation: "Astigmatism occurs when irregular refractive surfaces cause light rays to focus at multiple points." },
+                { q: "Which type of lens is utilized to correct myopia (short-sightedness)?", options: ["Convex lens", "Concave lens", "Cylindrical lens", "Bifocal lens"], answer: 1, explanation: "Concave lenses diverge light rays before entering the eye, enabling the image to form correctly on the retina." },
+                { q: "Stereoscopic vision provides an organism with which primary ecological advantage?", options: ["A wider 360-degree field of view", "Accurate depth perception and distance estimation", "Superior night vision capabilities", "Enhanced sensitivity to movement at margins"], answer: 1, explanation: "Stereoscopic vision overlaps visual fields from two forward-facing eyes, giving accurate 3D depth perception useful for predators." },
+                { q: "Monocular vision is predominantly observed in which group of animals?", options: ["Predatory birds", "Prey animals", "Primates", "Arboreal carnivores"], answer: 1, explanation: "Prey animals (e.g., rabbits) have side-facing eyes providing monocular vision to maximize field of view for threat detection." },
+                { q: "Which sensory receptor in human skin is situated deepest within the dermis layer?", options: ["Pain receptor", "Touch receptor", "Pressure receptor", "Temperature receptor"], answer: 2, explanation: "Pacinian corpuscles (pressure receptors) are situated deep within the dermal and subcutaneous layers." },
+                { q: "What is the primary role of the Eustachian tube in the middle ear?", options: ["Amplify sound vibrations", "Balance fluid movement in semicircular canals", "Equalize air pressure on both sides of the eardrum", "Transmit signals to the auditory nerve"], answer: 2, explanation: "The Eustachian tube connects the middle ear to the nasopharynx to maintain equal pressure across the tympanic membrane." },
+                { q: "The olfactory sensory cells are located in which anatomical structure?", options: ["Roof of the nasal cavity", "Larynx", "Soft palate", "Buccal mucosa"], answer: 0, explanation: "Olfactory epithelium lined with specialized chemoreceptors is situated at the upper roof of the nasal cavity." },
+                { q: "Which papillae structures on the human tongue contain gustatory taste buds?", options: ["Epidermal pores", "Taste papillae", "Keratin ridges", "Dermal villi"], answer: 1, explanation: "Taste buds containing chemoreceptors are localized within the papillae on the dorsal surface of the tongue." },
+                { q: "In involuntary reflex actions, what bypasses conscious brain processing to ensure a rapid response?", options: ["Sensory neuron directly to motor nerve", "Reflex arc involving the spinal cord", "Autonomic hormone release", "Cerebral relay circuit"], answer: 1, explanation: "A reflex arc routes impulses straight through the spinal cord for immediate motor output without waiting for conscious cerebral analysis." },
+                { q: "Plant shoots exhibit positive phototropism due to the migration of which plant hormone to the shaded side?", options: ["Gibberellin", "Ethylene", "Auxin", "Abscisic acid"], answer: 2, explanation: "Auxins accumulate on the shaded side of plant stems, stimulating cell elongation and causing bending towards light." },
+                { q: "Which mechanism allows human pupils to constrict under high light intensity?", options: ["Contraction of radial muscles", "Contraction of circular pupillary muscles", "Relaxation of the ciliary body", "Dilation of iris blood vessels"], answer: 1, explanation: "In bright light, parasympathetic signals contract the circular iris muscles to narrow the pupil and protect the retina." },
+                { q: "Which human sensory organ relies on hair cells situated inside three fluid-filled semicircular canals for balance?", options: ["Cochlea", "Vestibular system of the inner ear", "Tympanic membrane", "Eustachian apparatus"], answer: 1, explanation: "The semicircular canals detect rotational head movements and send postural feedback via the vestibular nerve." }
+            ],
+            2: [
+                { q: "During human inhalation, what happens to the diaphragm and intercostal muscles?", options: ["Diaphragm contracts (flattens); external intercostal muscles contract", "Diaphragm relaxes (domes); external intercostal muscles relax", "Diaphragm contracts; internal intercostal muscles contract", "Diaphragm relaxes; ribcage moves downward"], answer: 0, explanation: "During inhalation, the diaphragm contracts downwards while external intercostals pull the ribcage up and out, expanding thoracic volume." },
+                { q: "What is the structural advantage of the millions of tiny alveoli present in human lungs?", options: ["Increase mucosal secretion", "Provide maximum surface area for gas exchange", "Prevent lung collapse during exhalation", "Filter incoming dust particles"], answer: 1, explanation: "Alveoli vastly increase total surface area to maximize rapid diffusion of oxygen and carbon dioxide across thin moist membranes." },
+                { q: "In human blood, oxygen combines reversibly with hemoglobin in red blood cells to form which compound?", options: ["Carboxyhemoglobin", "Oxyhemoglobin", "Bicarbonate ion", "Carbaminohemoglobin"], answer: 1, explanation: "Oxygen binds to the iron-containing heme groups of hemoglobin to form oxyhemoglobin in alveolar capillaries." },
+                { q: "Which toxic gas present in cigarette smoke binds irreversibly to hemoglobin, reducing blood oxygen capacity?", options: ["Sulfur dioxide", "Carbon monoxide", "Nitrogen dioxide", "Methane"], answer: 1, explanation: "Carbon monoxide has a much higher affinity for hemoglobin than oxygen, forming stable carboxyhemoglobin." },
+                { q: "How do amphibians like frogs perform gas exchange while submerged in moist environments?", options: ["Exclusively through lungs", "Through moist, permeable outer skin", "Using specialized internal gills", "By buccal pumping only"], answer: 1, explanation: "Amphibians use cutaneous respiration, diffusing oxygen directly through their thin, moist, highly vascularized skin." },
+                { q: "Gills in bony fish feature numerous thin filaments covered in micro-projections known as:", options: ["Tracheoles", "Lamellae", "Alveoli", "Stomata"], answer: 1, explanation: "Gill lamellae greatly expand surface area and utilize countercurrent blood flow to extract dissolved oxygen from water." },
+                { q: "What is the respiratory structure composed of branching chitinous tubes found in insects?", options: ["Book lungs", "Tracheal system", "Branchial arches", "Cutaneous pores"], answer: 1, explanation: "Insects rely on a network of air-filled chitin tubes called tracheae that branch into delicate tracheoles reaching body tissues directly." },
+                { q: "Which gas is primarily produced as a metabolic waste product of cellular respiration?", options: ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"], answer: 1, explanation: "Cellular respiration oxidizes glucose using oxygen, yielding water, ATP energy, and carbon dioxide waste." },
+                { q: "During strenuous exercise, muscle cells generate energy anaerobically when oxygen is limited, producing:", options: ["Ethanol", "Lactic acid", "Uric acid", "Carbonic acid"], answer: 1, explanation: "Anaerobic glycolysis converts pyruvate into lactic acid, leading to temporary oxygen debt and muscle fatigue." },
+                { q: "Which atmospheric pollutant is primarily responsible for damaging alveolar walls and causing emphysema?", options: ["Tar and oxidants in tobacco smoke", "Carbon dioxide", "Helium", "Water vapor"], answer: 0, explanation: "Toxic chemical irritants in smoke destroy delicate elastic alveolar structures, leading to emphysema." },
+                { q: "What path does inhaled air take after passing through the larynx?", options: ["Bronchus -> Trachea -> Alveolus", "Trachea -> Bronchi -> Bronchioles -> Alveoli", "Bronchioles -> Trachea -> Alveoli", "Alveoli -> Bronchioles -> Trachea"], answer: 1, explanation: "Inhaled air travels down the trachea, splits into left and right main bronchi, enters smaller bronchioles, and terminates in alveoli." },
+                { q: "Which structure prevents food from entering the trachea during swallowing?", options: ["Pharynx", "Epiglottis", "Thyroid cartilage", "Uvula"], answer: 1, explanation: "The epiglottis is a cartilaginous flap that covers the glottis opening of the trachea during swallowing." },
+                { q: "By which cellular transport mechanism does oxygen cross the alveolar-capillary membrane?", options: ["Active transport", "Simple diffusion", "Facilitated endocytosis", "Osmosis"], answer: 1, explanation: "Gases move passively along steep partial pressure gradients across the thin alveolar wall by simple diffusion." },
+                { q: "Which component of cigarette smoke is carcinogenic and settles as a sticky residue in the respiratory tract?", options: ["Nicotine", "Tar", "Carbon monoxide", "Arsenic gas"], answer: 1, explanation: "Tar contains carcinogenic aromatic hydrocarbons that paralyze cilia and deposit inside respiratory passages." },
+                { q: "How is the majority of carbon dioxide transported in human blood back to the lungs?", options: ["Dissolved directly as gas in plasma", "Bound to red cell membrane", "As hydrogen carbonate (bicarbonate) ions in plasma", "Combined with blood proteins"], answer: 2, explanation: "Roughly 70% of CO2 reacts with water in red blood cells to form carbonic acid, which dissociates into bicarbonate ions in plasma." },
+                { q: "What is the function of mucus and cilia lining the human trachea?", options: ["Warm incoming air only", "Trap dust/pathogens and sweep them upward away from lungs", "Produce digestive enzymes", "Exchange carbon dioxide directly"], answer: 1, explanation: "Goblet cells produce sticky mucus to trap foreign particles, while rhythmic ciliary beating sweeps debris toward the pharynx." },
+                { q: "Which respiratory illness is characterized by chronic inflammation and narrowing of the bronchioles?", options: ["Pneumothorax", "Asthma", "Scurvy", "Atherosclerosis"], answer: 1, explanation: "Asthma involves airway hyper-responsiveness, smooth muscle constriction, and excess mucus production in bronchioles." },
+                { q: "Why are outer surfaces of insect spiracles often guarded by valves or fine hairs?", options: ["To prevent water loss and exclude debris", "To accelerate carbon dioxide absorption", "To generate sound during flight", "To absorb ambient heat"], answer: 0, explanation: "Spiracular valves restrict evaporation of moisture from internal tracheal networks and filter dust particles." },
+                { q: "What structural feature keeps the human trachea open despite pressure changes during breathing?", options: ["Continuous bony rings", "C-shaped rings of hyaline cartilage", "Thick muscular walls", "High internal air pressure"], answer: 1, explanation: "C-shaped cartilage rings provide rigid support preventing tracheal collapse during low-pressure inhalation." },
+                { q: "How does persistent bronchitis affect the respiratory mucosa?", options: ["Destroys red blood cells", "Causes chronic inflammation and excessive mucus secretion in bronchial tubes", "Hardens alveolar elastic fibers into bone", "Prevents muscular movement of the diaphragm"], answer: 1, explanation: "Chronic bronchitis is characterized by continuous inflammation of bronchial linings, producing heavy coughs and excess mucus." }
+            ],
+            3: [
+                { q: "Which blood vessels possess thin walls, wide lumens, and internal valves to prevent backflow?", options: ["Arteries", "Arterioles", "Capillaries", "Veins"], answer: 3, explanation: "Veins carry low-pressure blood back toward the heart and require semilunar valves to stop venous backflow." },
+                { q: "What is the primary function of blood platelets (thrombocytes)?", options: ["Transport molecular oxygen", "Engulf pathogenic bacteria", "Initiate blood clotting mechanisms", "Synthesize blood plasma proteins"], answer: 2, explanation: "Platelets aggregate at vascular injury sites and release clotting factors to convert fibrinogen into insoluble fibrin meshes." },
+                { q: "Which chamber of the human heart pumps oxygenated blood into the aorta for systemic distribution?", options: ["Right atrium", "Right ventricle", "Left atrium", "Left ventricle"], answer: 3, explanation: "The left ventricle features thick muscular walls to generate high hydrostatic pressure, driving oxygenated blood into the aorta." },
+                { q: "Double circulatory systems in mammals consist of which two interconnected circuits?", options: ["Pulmonary and Systemic circulations", "Coronary and Hepatic circulations", "Lymphatic and Renal circulations", "Capillary and Venous circulations"], answer: 0, explanation: "Mammalian blood flows through the pulmonary circuit (heart-lungs-heart) and the systemic circuit (heart-body tissues-heart)." },
+                { q: "Which vascular tissue in flowering plants transports water and dissolved mineral salts upward from roots?", options: ["Phloem", "Xylem", "Cambium", "Epidermis"], answer: 0, explanation: "Xylem vessels consist of dead, lignified tubular structures that transport water and minerals unidirectionally upwards." },
+                { q: "Translocation in plants refers specifically to the transport of:", options: ["Water vapor through stomata", "Dissolved sucrose and amino acids via phloem", "Mineral ions through xylem vessels", "Oxygen gas inside spongy mesophyll"], answer: 1, explanation: "Translocation is the energy-dependent transport of organic photosynthetic products (sucrose) through sieve tubes of phloem." },
+                { q: "Which process creates the main pull drawing water continuously up xylem columns in tall trees?", options: ["Root pressure", "Transpiration pull caused by stomatal evaporation", "Capillary action alone", "Active uptake of water"], answer: 1, explanation: "Evaporation of water vapor through leaf stomata creates negative pressure (transpiration pull) pulling cohesive water molecules upward." },
+                { q: "Which blood group is designated as the universal red blood cell donor because it lacks A and B antigens?", options: ["Blood Group A", "Blood Group B", "Blood Group AB", "Blood Group O"], answer: 3, explanation: "Group O red blood cells lack both A and B surface antigens, preventing immune agglutination in recipients." },
+                { q: "What occurs during cardiac ventricular systole?", options: ["Atria and ventricles relax completely", "Ventricles contract, pumping blood into aorta and pulmonary artery", "AV valves open wide", "Blood flows passively from vena cava into atria"], answer: 1, explanation: "Ventricular systole is the contraction phase where ventricles force blood out into the pulmonary trunk and aorta." },
+                { q: "Which heart valve prevents blood from flowing backward from the left ventricle into the left atrium?", options: ["Tricuspid valve", "Bicuspid (mitral) valve", "Aortic semilunar valve", "Pulmonary valve"], answer: 1, explanation: "The bicuspid (mitral) valve guards the left atrioventricular opening, closing firmly during ventricular contraction." },
+                { q: "What liquid component constitutes approximately 55% of total human blood volume?", options: ["Erythrocytes", "Leukocytes", "Plasma", "Platelets"], answer: 2, explanation: "Blood plasma is a straw-colored fluid composed mostly of water, proteins, nutrients, and dissolved waste products." },
+                { q: "Which cellular component of blood produces specific antibodies to neutralize pathogens?", options: ["Phagocytes", "B-Lymphocytes", "Erythrocytes", "Thrombocytes"], answer: 1, explanation: "B-lymphocytes are specialized white blood cells that synthesize targeted immunoglobulins (antibodies)." },
+                { q: "In a plant vascular bundle of a dicot stem, where is the cambium layer situated?", options: ["Center of the pith", "Between xylem and phloem tissues", "Outside the epidermis", "Surrounding cortex cells"], answer: 1, explanation: "Vascular cambium sits between the inner xylem and outer phloem, facilitating secondary growth." },
+                { q: "Which environmental factor decreases the rate of plant transpiration?", options: ["Increased light intensity", "Higher ambient temperature", "Elevated relative atmospheric humidity", "Increased air movement/wind"], answer: 2, explanation: "High humidity reduces the concentration gradient of water vapor between internal leaf spaces and ambient air, slowing transpiration." },
+                { q: "Why do arteries have thick, elastic, and muscular walls?", options: ["To allow easy diffusion of gases", "To withstand high surging pressure of blood ejected from the heart", "To prevent backflow using interior valves", "To store glucose reserves"], answer: 1, explanation: "Arterial walls contain thick smooth muscle and elastic fibers to accommodate high-pressure blood surges from heart contractions." },
+                { q: "The pacemaker of the human heart, responsible for initiating electrical impulses, is the:", options: ["Atrioventricular (AV) node", "Sinoatrial (SA) node", "Bundle of His", "Purkinje fibers"], answer: 1, explanation: "The SA node located in the right atrium wall generates spontaneous electrical impulses setting cardiac rhythm." },
+                { q: "Which condition results from accumulation of fatty plaque inside coronary arteries?", options: ["Atherosclerosis", "Anemia", "Leukemia", "Hemophilia"], answer: 0, explanation: "Atherosclerosis involves lipid deposition in arterial walls, narrowing lumens and potentially restricting blood flow to cardiac muscle." },
+                { q: "How do guard cells control the opening of stomatal pores?", options: ["By absorbing water to become turgid and bow outward", "By losing water to become rigid", "By cell division", "By contracting cilia"], answer: 0, explanation: "When guard cells take up water via osmosis, they become turgid; their thicker inner walls cause them to curve open." },
+                { q: "Which component of the human lymphatic system absorbs fatty acids and glycerol in intestinal villi?", options: ["Blood capillaries", "Lacteals", "Hepatic portal vein", "Systemic arterioles"], answer: 1, explanation: "Lacteals are specialized lymphatic capillaries in small intestine villi that absorb dietary lipids." },
+                { q: "What is the normal blood pressure reading benchmark for a healthy young adult at rest?", options: ["80/120 mmHg", "120/80 mmHg", "150/100 mmHg", "60/90 mmHg"], answer: 1, explanation: "Standard healthy resting blood pressure is around 120 mmHg systolic over 80 mmHg diastolic." }
+            ],
+            4: [
+                { q: "Which non-metallic element is situated between Aluminium and Zinc in the reactivity series of metals?", options: ["Hydrogen", "Carbon", "Oxygen", "Sulfur"], answer: 1, explanation: "Carbon is placed between Aluminium and Zinc in the extraction reactivity series, allowing it to reduce metals below it." },
+                { q: "When a metal reacts with dilute hydrochloric acid, which gas is liberated?", options: ["Oxygen", "Carbon dioxide", "Hydrogen", "Nitrogen"], answer: 2, explanation: "Reactive metals displace hydrogen from dilute acids, releasing flammable hydrogen gas." },
+                { q: "Which metal reacts violently with cold water, producing an alkaline solution and hydrogen gas?", options: ["Copper", "Iron", "Potassium", "Lead"], answer: 2, explanation: "Potassium is an alkali metal located at the extreme top of the reactivity series that reacts vigorously with cold water." },
+                { q: "What observation indicates a chemical reaction when heated Copper(II) oxide reacts with Carbon powder?", options: ["Formation of a blue solution", "Red-brown solid formed and lime water turns cloudy", "Gas evolution with a pop sound", "No change occurs"], answer: 1, explanation: "Carbon reduces black Copper(II) oxide to red-brown elemental Copper, forming Carbon dioxide gas that turns lime water cloudy." },
+                { q: "Why is Gold found in its native uncombined elemental state in the Earth's crust?", options: ["It is highly reactive", "It is extremely unreactive and located at the bottom of the reactivity series", "It forms stable soluble oxides", "It reacts rapidly with silica"], answer: 1, explanation: "Gold is a noble metal near the bottom of the reactivity series, resisting oxidation and remaining uncombined." },
+                { q: "Which industrial method is required to extract Aluminium from its purified ore (bauxite)?", options: ["Reduction with Carbon in a blast furnace", "Electrolysis of molten ore", "Simple thermal decomposition", "Displacement using Iron"], answer: 1, explanation: "Aluminium is more reactive than carbon, so it must be extracted via electrolysis of molten bauxite (in cryolite)." },
+                { q: "In a blast furnace extraction of Iron, what is the purpose of adding limestone (Calcium carbonate)?", options: ["To act as a fuel source", "To reduce Iron oxide directly", "To remove acidic impurities (silica) by forming slag", "To lower furnace temperature"], answer: 2, explanation: "Limestone decomposes to CaO, which reacts with silicon dioxide impurities to produce molten slag (Calcium silicate)." },
+                { q: "What product is formed when Magnesium burns brightly in pure Oxygen gas?", options: ["Magnesium hydroxide", "Magnesium oxide", "Magnesium carbonate", "Magnesium hydride"], answer: 1, explanation: "Magnesium ribbon burns with a intense white flame in oxygen to produce a white powder, Magnesium oxide." },
+                { q: "Which metal CANNOT displace Hydrogen gas from dilute mineral acids?", options: ["Zinc", "Iron", "Magnesium", "Copper"], answer: 3, explanation: "Copper is positioned below Hydrogen in the reactivity series and cannot displace it from dilute acids." },
+                { q: "Thermite reactions use Aluminium powder to reduce Iron(III) oxide because:", options: ["Aluminium is less reactive than Iron", "Aluminium is more reactive than Iron and acts as a strong reducing agent", "Iron oxide acts as a catalyst", "The reaction is endothermic"], answer: 1, explanation: "Aluminium has a higher affinity for oxygen than iron, releasing intense heat in a highly exothermic displacement reaction." },
+                { q: "Which gas is used in a blast furnace to reduce Iron(III) oxide to molten Iron?", options: ["Carbon dioxide", "Carbon monoxide", "Methane", "Sulfur dioxide"], answer: 1, explanation: "Coke burns to form Carbon monoxide gas, which acts as the main gaseous reducing agent converting iron ore to iron." },
+                { q: "Natural mineral ores that consist of metal sulfides or metal carbonates are called:", options: ["Synthetic compounds", "Minerals/Ores", "Alloys", "Polymers"], answer: 1, explanation: "Ores are naturally occurring solid mineral deposits containing economically viable metal compounds." },
+                { q: "What is the chemical name of the primary iron ore known as hematite?", options: ["Iron(II) carbonate", "Iron(III) oxide", "Iron sulfide", "Iron hydroxide"], answer: 1, explanation: "Hematite consists predominantly of Iron(III) oxide ($Fe_2O_3$)." },
+                { q: "When Zinc sulfide ore (sphalerite) is roasted in air, what toxic gas is released as a byproduct?", options: ["Carbon monoxide", "Sulfur dioxide", "Chlorine gas", "Ammonia"], answer: 1, explanation: "Roasting metal sulfides in oxygen converts them to metal oxides and generates sulfur dioxide gas." },
+                { q: "Which metal oxide can be reduced by heating with Hydrogen gas?", options: ["Potassium oxide", "Magnesium oxide", "Copper(II) oxide", "Calcium oxide"], answer: 2, explanation: "Hydrogen can reduce oxides of metals below it in the reactivity series, such as Copper(II) oxide." },
+                { q: "What is the correct sequence of metal reactivity (most to least) for Mg, Cu, Zn, and K?", options: ["K > Mg > Zn > Cu", "Cu > Zn > Mg > K", "Mg > K > Cu > Zn", "Zn > Mg > K > Cu"], answer: 0, explanation: "Potassium (K) is most reactive, followed by Magnesium (Mg), Zinc (Zn), and Copper (Cu)." },
+                { q: "Why is coke (carbon) added to a blast furnace alongside iron ore?", options: ["To insulate the outer furnace walls", "To produce heat and generate Carbon monoxide reducing gas", "To prevent slag formation", "To coat the molten iron"], answer: 1, explanation: "Coke reacts with oxygen to generate high heat and carbon monoxide, the principal reducing agent in iron extraction." },
+                { q: "What happens when lead powder is heated with aluminium oxide?", options: ["Lead reduces aluminium oxide", "A violent exothermic reaction occurs", "No reaction occurs", "Lead oxide and aluminium metal form"], answer: 2, explanation: "Lead is far less reactive than aluminium, so it cannot abstract oxygen from aluminium oxide." },
+                { q: "Which slag constituent floats on top of molten iron at the base of a blast furnace, preventing re-oxidation?", options: ["Silicon dioxide", "Calcium silicate", "Carbon disulfide", "Iron sulfide"], answer: 1, explanation: "Molten calcium silicate (slag) is less dense than molten iron, floating on top to protect the iron from oxidizing." },
+                { q: "What color change is observed when dark black Copper(II) oxide is reduced by Hydrogen gas?", options: ["Turns bright yellow", "Turns reddish-brown", "Turns deep blue", "Turns silvery gray"], answer: 1, explanation: "Black Copper(II) oxide is reduced to elemental copper metal, which exhibits a reddish-brown appearance." }
+            ],
+            5: [
+                { q: "An exothermic reaction is defined as a chemical process that:", options: ["Absorbs thermal energy from the surroundings", "Releases thermal energy into the surroundings", "Occurs only at absolute zero", "Maintains constant system temperature"], answer: 1, explanation: "Exothermic reactions release energy to their environment, causing ambient temperature to rise." },
+                { q: "Which observation accompanies an endothermic chemical reaction occurring in an aqueous solution?", options: ["Temperature of the solution increases", "Temperature of the solution decreases", "Bright light emission", "Violent explosive gas production"], answer: 1, explanation: "Endothermic reactions absorb heat energy from the surrounding solvent, resulting in a temperature drop." },
+                { q: "Which of the following processes is classified as exothermic?", options: ["Photosynthesis in green leaves", "Thermal decomposition of calcium carbonate", "Combustion of methane gas", "Dissolving ammonium chloride in water"], answer: 2, explanation: "Combustion reactions oxidize fuel completely, liberating substantial heat and light energy." },
+                { q: "What happens to chemical bonds during an endothermic process?", options: ["Bond formation releases more energy than bond breaking requires", "Energy required to break bonds is greater than energy released forming new bonds", "No bonds are broken or formed", "Nuclear forces are altered"], answer: 1, explanation: "In endothermic reactions, the total activation energy needed for bond cleavage exceeds the energy liberated during product bond formation." },
+                { q: "Which application relies directly on an endothermic reaction?", options: ["Self-heating food cans", "Instant cold packs used for sports injury relief", "Hand warmer pads", "Industrial thermite welding"], answer: 1, explanation: "Instant cold packs contain chemicals (like ammonium nitrate and water) that absorb heat upon mixing." },
+                { q: "What term describes the minimum kinetic energy required by colliding reactant particles to initiate a chemical reaction?", options: ["Enthalpy change", "Activation energy", "Thermal capacity", "Kinetic threshold"], answer: 1, explanation: "Activation energy ($E_a$) is the minimum energy barrier that colliding molecules must overcome to react." },
+                { q: "In an energy profile diagram for an exothermic reaction, how do the energy levels of products compare to reactants?", options: ["Products have higher energy than reactants", "Products have lower energy than reactants", "Products and reactants have identical energy", "Energy levels fluctuate continuously"], answer: 1, explanation: "Exothermic reactions yield products with lower total chemical energy than reactants; the net difference is released as heat." },
+                { q: "Dissolving solid Sodium hydroxide ($NaOH$) in distilled water causes the beaker temperature to rise. This reaction is:", options: ["Endothermic", "Exothermic", "Isothermal", "Reversible"], answer: 1, explanation: "Dissolution of sodium hydroxide releases hydration energy, increasing solution temperature (exothermic)." },
+                { q: "Photosynthesis is considered an endothermic process because plant cells:", options: ["Release thermal energy into atmosphere", "Absorb light energy to synthesize glucose from $CO_2$ and $H_2O$", "Burn glucose to produce ATP", "Decompose water into hydrogen gas"], answer: 1, explanation: "Photosynthesis absorbs solar radiant energy to drive the endergonic synthesis of glucose." },
+                { q: "When solid Ammonium chloride ($NH_4Cl$) is dissolved in water, the temperature drops. This process is:", options: ["Exothermic", "Endothermic", "Combustion", "Neutralization"], answer: 1, explanation: "Dissolving ammonium salts absorbs ambient thermal energy from the solution, lowering its temperature." },
+                { q: "Neutralization between hydrochloric acid and sodium hydroxide solution is an example of:", options: ["An endothermic reaction", "An exothermic reaction", "A photochemical reaction", "A nuclear reaction"], answer: 1, explanation: "Acid-base neutralization reactions consistently release heat energy, making them exothermic." },
+                { q: "What symbol represents enthalpy change in thermochemical equations?", options: ["$\Delta H$", "$E_a$", "$K_c$", "$\Delta S$"], answer: 0, explanation: "Enthalpy change is denoted by $\Delta H$, representing net heat absorbed or released under constant pressure." },
+                { q: "If a chemical reaction has a negative enthalpy change ($\Delta H < 0$), the reaction is:", options: ["Endothermic", "Exothermic", "At equilibrium", "Non-spontaneous"], answer: 1, explanation: "A negative $\Delta H$ signifies that enthalpy decreases as heat leaves the chemical system (exothermic)." },
+                { q: "Which household appliance or object utilizes an exothermic oxidation reaction?", options: ["Refrigeration cooling coils", "Disposable iron-powder hand warmers", "Evaporative air coolers", "Cold compress gel packs"], answer: 1, explanation: "Iron powder in hand warmers undergoes slow exothermic oxidation in air to generate persistent heat." },
+                { q: "What happens to surrounding ambient air during an endothermic chemical change?", options: ["Gains thermal energy and warms up", "Loses thermal energy and cools down", "Remains unchanged in temperature", "Expands rapidly into vacuum"], answer: 1, explanation: "Endothermic reactions extract thermal energy from ambient surroundings, reducing surrounding temperatures." },
+                { q: "Respiration in living cells is an exothermic process because it:", options: ["Consumes atmospheric nitrogen", "Breaks down glucose to release biological energy and heat", "Requires continuous light absorption", "Stores surplus heat in water"], answer: 1, explanation: "Cellular respiration oxidizes nutrients to yield ATP energy and thermal heat released into tissues." },
+                { q: "Which energetic change occurs when steam condenses into liquid water?", options: ["Heat is absorbed (endothermic)", "Heat is released (exothermic)", "Temperature drops to absolute zero", "Chemical bonds are broken"], answer: 1, explanation: "Condensation requires water molecules to release latent heat of vaporization, making it exothermic." },
+                { q: "Thermal decomposition of limestone ($CaCO_3$) into lime ($CaO$) and $CO_2$ requires continuous kiln heating. It is:", options: ["An exothermic reaction", "An endothermic reaction", "A catalytic reaction", "A spontaneous reaction"], answer: 1, explanation: "Thermal decomposition requires high heat input to break chemical bonds within calcium carbonate." },
+                { q: "In an endothermic energy level diagram, the energy of the products is:", options: ["Lower than the energy of reactants", "Higher than the energy of reactants", "Equal to the energy of reactants", "Zero"], answer: 1, explanation: "Endothermic systems absorb net energy, elevating the internal potential energy of products above reactants." },
+                { q: "Why does slaking lime (adding water to Calcium oxide) cause water to boil violently?", options: ["It is a strongly endothermic hydration", "It is a highly exothermic hydration reaction", "It generates nuclear radiation", "It absorbs all surrounding liquid"], answer: 1, explanation: "The reaction between calcium oxide and water releases massive heat energy, raising water to boiling point." }
+            ],
+            6: [
+                { q: "What electrical instrument generates direct current (DC) through electromagnetic induction when a coil rotates in a magnetic field?", options: ["Transformer", "DC Generator / Dynamo", "AC Alternator", "Commutator switch"], answer: 1, explanation: "A DC generator utilizes a split-ring commutator to ensure induced current flows in a single direction." },
+                { q: "Which type of transformer increases output voltage while reducing output current?", options: ["Step-down transformer", "Step-up transformer", "Isolation transformer", "Auto-transformer"], answer: 1, explanation: "A step-up transformer has more secondary turns than primary turns, stepping up output AC voltage." },
+                { q: "What is the primary operational principle of a step-down transformer?", options: ["Primary coil has fewer turns than secondary coil", "Primary coil has more turns than secondary coil", "Operates exclusively on direct current (DC)", "Increases frequency of output current"], answer: 1, explanation: "Step-down transformers feature fewer secondary winding turns ($N_s < N_p$), reducing output secondary voltage." },
+                { q: "Why is electricity transmitted over long national grid distances at extremely high voltages?", options: ["To increase current flow speed", "To minimize energy lost as heat ($I^2R$) in transmission lines", "To prevent lightning strikes", "To allow thinner insulation materials"], answer: 1, explanation: "High voltage dramatically lowers transmission current ($I$), minimizing heat dissipation losses across wire resistance ($R$)." },
+                { q: "What color code is standard for the Live wire in household electrical wiring regulations?", options: ["Blue", "Green with yellow stripes", "Brown", "Black"], answer: 2, explanation: "Under standard modern wiring codes, Brown represents the Live wire, carrying current at supply potential." },
+                { q: "What is the function of the Earth wire in a standard three-pin electrical plug?", options: ["Carries current back to the main supply", "Provides a safe low-resistance path to ground in case of fault", "Regulates voltage fluctuations", "Acts as a primary circuit switch"], answer: 1, explanation: "The Earth wire grounds appliance metallic casings, channeling leakage current safely into the ground during short circuits." },
+                { q: "A transformer has 200 primary turns and 50 secondary turns. If input AC voltage is 240V, what is output voltage?", options: ["60 V", "960 V", "120 V", "48 V"], answer: 0, explanation: "Using $\\frac{V_p}{V_s} = \\frac{N_p}{N_s} \\implies \\frac{240}{V_s} = \\frac{200}{50} = 4 \\implies V_s = 60\\text{ V}$." },
+                { q: "Which magnetic rule determines the direction of induced current in a conductor moving through a magnetic field?", options: ["Fleming's Left-Hand Rule", "Fleming's Right-Hand Rule", "Right-Hand Grip Rule", "Maxwell's Corkscrew Rule"], answer: 1, explanation: "Fleming's Right-Hand Rule is used for generators to determine induced current direction from motion and field." },
+                { q: "What property characterizes direct current (DC)?", options: ["Flows continuously in a single invariant direction", "Reverses direction periodically at 50 Hz", "Requires a step-up transformer to operate", "Has sinusoidal waveform"], answer: 0, explanation: "Direct current flows unidirectionally with constant or steady polarity over time." },
+                { q: "Which component inside a national power station rotates inside a magnetic field to generate electricity?", options: ["Turbine", "Boiler", "Rotor/Armature of Generator", "Condenser"], answer: 2, explanation: "Mechanical energy turns the rotor armature of a high-capacity generator, inducing electric current in stator coils." },
+                { q: "Which energy source utilized in power generation is classified as renewable?", options: ["Coal", "Natural Gas", "Hydroelectric energy", "Uranium-235"], answer: 2, explanation: "Hydroelectric power uses the continuous water cycle, making it a sustainable renewable energy resource." },
+                { q: "What is the purpose of a fuse in a domestic consumer unit?", options: ["To step down incoming main voltage", "To melt and break the circuit when current exceeds safe rating", "To measure total electrical units consumed", "To ground static electricity"], answer: 1, explanation: "A fuse contains a thin wire with a low melting point that melts during overcurrent events, protecting the circuit." },
+                { q: "What electrical parameter is measured in kilowatt-hours (kWh)?", options: ["Electric Power", "Electrical Energy consumption", "Current flow rate", "Electro-motive force"], answer: 1, explanation: "Kilowatt-hour ($kWh$) is the commercial unit quantifying total electrical energy used over time." },
+                { q: "Which formula calculates electrical power consumption?", options: ["$P = V \\times I$", "$P = \\frac{V}{I}$", "$P = I^2 \\times V$", "$P = \\frac{I}{V}$"], answer: 0, explanation: "Electrical power ($P$) in watts equals electric potential difference ($V$) multiplied by current ($I$)." },
+                { q: "Why do transformers NOT function when connected to a steady direct current (DC) supply?", options: ["DC current is too powerful for primary coils", "DC creates a static magnetic field, offering no change in magnetic flux to induce secondary voltage", "DC causes immediate overheating of iron core", "DC reverses polarity too rapidly"], answer: 1, explanation: "Electromagnetic induction requires a changing magnetic flux, which steady direct current cannot produce." },
+                { q: "What is the primary function of the soft iron core in a transformer?", options: ["Insulate electrical windings", "Concentrate and efficiently transfer magnetic flux between coils", "Generate secondary electron current", "Cool down transformer oil"], answer: 1, explanation: "Soft iron easily magnetizes and demagnetizes, efficiently guiding magnetic flux lines from primary to secondary coils." },
+                { q: "In Malaysia, what standard single-phase mains domestic voltage and frequency are supplied to homes?", options: ["110 V, 60 Hz", "240 V, 50 Hz", "400 V, 50 Hz", "120 V, 50 Hz"], answer: 1, explanation: "Standard Malaysian domestic supply is regulated at 240 Volts AC with a frequency of 50 Hertz." },
+                { q: "Which safety device automatically trips open an electromagnetic switch during current leakage to earth?", options: ["Miniature Circuit Breaker (MCB)", "Earth Leakage Circuit Breaker (ELCB / RCCB)", "Main Switch", "Cartridge Fuse"], answer: 1, explanation: "ELCB / RCCB detectors monitor imbalances between live and neutral wires, tripping instantly during earth faults." },
+                { q: "A 2000 W electric heater operates for 3 hours. Calculate the electrical energy used in units (kWh).", options: ["6 kWh", "600 kWh", "0.66 kWh", "60 kWh"], answer: 0, explanation: "$\\text{Energy (kWh)} = \\text{Power (kW)} \\times \\text{Time (h)} = 2\\text{ kW} \\times 3\\text{ h} = 6\\text{ kWh}$." },
+                { q: "Where is the main circuit fuse always connected in a domestic single-phase circuit?", options: ["In series with the Live wire", "In series with the Neutral wire", "In parallel across Earth and Neutral", "Along the Earth wire"], answer: 0, explanation: "Fuses are placed in the Live wire so that when blown, the appliance is completely isolated from high potential." }
+            ],
+            7: [
+                { q: "What is the standard SI unit for measuring work done and energy transferred?", options: ["Watt (W)", "Newton (N)", "Joule (J)", "Pascal (Pa)"], answer: 2, explanation: "Work and energy are measured in Joules (J), defined as force of one Newton applied over one meter." },
+                { q: "How much work is done when a force of 50 N moves a box horizontally through a distance of 4 meters?", options: ["200 J", "12.5 J", "54 J", "46 J"], answer: 0, explanation: "$\\text{Work} = \\text{Force} \\times \\text{Distance} = 50\\text{ N} \\times 4\\text{ m} = 200\\text{ Joules}$." },
+                { q: "Gravitational potential energy of an object depends directly on which set of variables?", options: ["Mass, velocity, and surface area", "Mass, gravitational acceleration, and height above reference", "Volume, density, and temperature", "Speed, time, and displacement"], answer: 1, explanation: "Gravitational Potential Energy is calculated as $E_p = mgh$ (mass $\\times$ gravity $\\times$ height)." },
+                { q: "Calculate the kinetic energy of a 1000 kg automobile traveling at a velocity of 20 m/s.", options: ["20,000 J", "200,000 J", "400,000 J", "10,000 J"], answer: 1, explanation: "$E_k = \\frac{1}{2} m v^2 = 0.5 \\times 1000 \\times (20)^2 = 0.5 \\times 1000 \\times 400 = 200,000\\text{ J}$." },
+                { q: "What physical quantity is defined as the rate of doing work or transferring energy per unit time?", options: ["Force", "Power", "Momentum", "Pressure"], answer: 1, explanation: "Power is defined as work done divided by time taken ($P = \\frac{W}{t}$), measured in Watts." },
+                { q: "An electric motor performs 3000 Joules of work in 10 seconds. What is its output power?", options: ["30,000 W", "300 W", "30 W", "0.003 W"], answer: 1, explanation: "$\\text{Power} = \\frac{\\text{Work}}{\\text{Time}} = \\frac{3000\\text{ J}}{10\\text{ s}} = 300\\text{ Watts}$." },
+                { q: "According to the Principle of Conservation of Energy, energy can:", options: ["Be created during nuclear fusion", "Be destroyed by friction forces", "Neither be created nor destroyed, only transformed between forms", "Increase spontaneously in closed systems"], answer: 2, explanation: "The Law of Conservation of Energy states total energy remains constant; it merely changes forms." },
+                { q: "What energy transformation occurs when a compressed metal spring is released to propel a toy car?", options: ["Elastic potential energy -> Kinetic energy", "Gravitational potential energy -> Chemical energy", "Kinetic energy -> Thermal energy only", "Nuclear energy -> Electrical energy"], answer: 0, explanation: "Stored elastic potential energy in the deformed spring converts into dynamic kinetic energy upon release." },
+                { q: "A 2 kg coconut falls from a palm tree height of 10 meters. What is its potential energy before falling? ($g = 10\\text{ m/s}^2$)", options: ["20 J", "100 J", "200 J", "50 J"], answer: 2, explanation: "$E_p = mgh = 2\\text{ kg} \\times 10\\text{ m/s}^2 \\times 10\\text{ m} = 200\\text{ Joules}$." },
+                { q: "Which state describes an object possessing maximum kinetic energy during pendulum motion?", options: ["At highest points of swing", "At lowest point of equilibrium position", "Halfway up turning points", "When completely at rest"], answer: 1, explanation: "At the lowest swing point, all potential energy has converted to kinetic energy, maximizing velocity." },
+                { q: "A worker lifts a 15 kg crate vertically through 2 meters in 3 seconds. Calculate power generated. ($g = 10\\text{ m/s}^2$)", options: ["100 W", "300 W", "90 W", "450 W"], answer: 0, explanation: "$\\text{Work} = mgh = 15 \\times 10 \\times 2 = 300\\text{ J}$. $\\text{Power} = \\frac{300}{3} = 100\\text{ Watts}$." },
+                { q: "What form of potential energy is stored within chemical bonds of hydrocarbon fuels?", options: ["Elastic potential energy", "Chemical potential energy", "Nuclear potential energy", "Electrostatic energy"], answer: 1, explanation: "Chemical potential energy is stored within molecular chemical bonds, released during exothermic oxidation." },
+                { q: "Why is mechanical efficiency of real-world machines always less than 100%?", options: ["Energy is destroyed in motion", "Friction converts part of input energy into non-useful heat and sound", "Gravity resists output force", "Mass changes during operation"], answer: 1, explanation: "Frictional resistance causes unwanted dissipation of input energy as thermal energy and acoustic waves." },
+                { q: "When an arrow is pulled back in a stretched bowstring, what energy is stored?", options: ["Kinetic energy", "Elastic potential energy", "Gravitational energy", "Thermal energy"], answer: 1, explanation: "Deforming an elastic bowstring stores elastic potential energy proportional to displacement distance." },
+                { q: "Calculate velocity of a 2 kg projectile possessing 100 J of kinetic energy.", options: ["10 m/s", "100 m/s", "5 m/s", "50 m/s"], answer: 0, explanation: "$E_k = \\frac{1}{2} m v^2 \\implies 100 = \\frac{1}{2} (2) v^2 \\implies v^2 = 100 \\implies v = 10\\text{ m/s}$." },
+                { q: "Work is mathematically defined as dot product of force and:", options: ["Time", "Displacement in direction of force", "Acceleration", "Velocity"], answer: 1, explanation: "Work is done only when force causes displacement along the line of action of the applied force." },
+                { q: "How much work is performed pushing against a immovable concrete wall with 500 N force for 1 minute?", options: ["30,000 J", "500 J", "0 J", "8.3 J"], answer: 2, explanation: "Since displacement $d = 0$, work done $W = F \\times d = 500 \\times 0 = 0\\text{ Joules}$." },
+                { q: "A hydroelectric dam generates electricity primarily by harnessing which energy transformation?", options: ["Chemical -> Electrical", "Gravitational potential -> Kinetic -> Electrical", "Thermal -> Nuclear -> Electrical", "Elastic -> Electrical"], answer: 1, explanation: "Elevated water stores potential energy, which becomes kinetic energy flowing through turbines driving electrical generators." },
+                { q: "Power of 1 Watt corresponds to an energy transfer rate of:", options: ["1 Joule per second", "1 Newton per meter", "1 Kilogram per second", "1 Volt per ampere"], answer: 0, explanation: "By definition, one Watt ($1\\text{ W}$) equals work rate of one Joule per second ($1\\text{ J/s}$)." },
+                { q: "What happens to kinetic energy of a motor vehicle when its speed doubles?", options: ["Doubles", "Triples", "Quadruples", "Remains unchanged"], answer: 2, explanation: "Kinetic energy is proportional to velocity squared ($v^2$); doubling speed ($2v$) yields $(2)^2 = 4$ times kinetic energy." }
+            ],
+            8: [
+                { q: "Which type of ionizing radiation consists of high-energy helium nuclei ($^4_2\\text{He}$)?", options: ["Alpha particles ($\alpha$)", "Beta particles ($\beta$)", "Gamma rays ($\gamma$)", "X-rays"], answer: 0, explanation: "Alpha particles are helium nuclei containing 2 protons and 2 neutrons, carrying a +2 charge." },
+                { q: "Which form of nuclear radiation possesses the highest penetrating power, requiring thick lead shielding?", options: ["Alpha particles", "Beta particles", "Gamma rays", "Positrons"], answer: 2, explanation: "Gamma rays are high-frequency electromagnetic radiation with extreme penetrating ability, stopped only by dense lead/concrete." },
+                { q: "What particle is emitted from a radioisotope nucleus during beta minus ($\beta^-$) decay?", options: ["Helium nucleus", "High-speed electron", "Neutron", "Proton"], answer: 1, explanation: "Beta minus decay occurs when a nuclear neutron converts into a proton, expelling a high-speed electron." },
+                { q: "What term describes the time taken for half the radioactive nuclei in a sample to undergo decay?", options: ["Biological half-life", "Radioactive Half-Life ($T_{1/2}$)", "Decay Constant", "Ionization period"], answer: 1, explanation: "Half-life ($T_{1/2}$) is the characteristic time required for half of a radioactive isotope's unstable nuclei to decay." },
+                { q: "A radioactive isotope has an initial mass of 80 grams and a half-life of 6 hours. What mass remains after 18 hours?", options: ["40 g", "20 g", "10 g", "5 g"], answer: 2, explanation: "18 hours represents 3 half-lives ($18 / 6 = 3$). Mass remaining: $80 \\rightarrow 40 \\rightarrow 20 \\rightarrow 10\\text{ grams}$." },
+                { q: "Which SI unit measures background radiation dosage absorbed by human tissue?", options: ["Becquerel (Bq)", "Sievert (Sv)", "Curie (Ci)", "Gray (Gy)"], answer: 1, explanation: "The Sievert (Sv) quantifies biological health risks associated with ionizing radiation exposure." },
+                { q: "Radioisotopes like Carbon-14 ($^{14}\\text{C}$) are used extensively in archaeology for:", options: ["Determining age of ancient organic artifacts (Radiocarbon dating)", "Sterilization of surgical equipment", "Nuclear weapons yield testing", "Generating commercial electrical power"], answer: 0, explanation: "Carbon-14 dating measures residual $^{14}\\text{C}$ decay in dead organic material to estimate age up to 50,000 years." },
+                { q: "Which radioisotope is administered in medicine as a tracer to evaluate thyroid gland performance?", options: ["Cobalt-60", "Iodine-131", "Uranium-235", "Carbon-14"], answer: 1, explanation: "The thyroid gland absorbs iodine; Iodine-131 decay emissions are monitored to diagnose thyroid diseases." },
+                { q: "Ionizing radiation is hazardous to living cells because it can:", options: ["Cause thermal burns only", "Ionize atoms, damage cellular DNA, and induce mutations or cancer", "Freeze cytoplasm solid", "Deactivate cellular osmosis"], answer: 1, explanation: "Ionizing radiation knocks electrons off atoms, creating reactive radicals that damage DNA and cause genetic mutations." },
+                { q: "Alpha particles can be stopped completely by which minimal barrier?", options: ["A sheet of paper or outer dead skin layer", "5 mm layer of aluminium", "20 cm block of solid lead", "2 meters of water"], answer: 0, explanation: "Due to large mass and +2 charge, alpha particles have low penetrating power and are stopped by a single sheet of paper." },
+                { q: "What charge is carried by a beta particle?", options: ["Positive (+2)", "Negative (-1)", "Neutral (0)", "Positive (+1)"], answer: 1, explanation: "Standard beta minus particles are electrons carrying a single negative elementary charge (-1)." },
+                { q: "Which unit quantifies radioactive decay rate activity in disintegrations per second?", options: ["Sievert (Sv)", "Becquerel (Bq)", "Joule (J)", "Watt (W)"], answer: 1, explanation: "One Becquerel (1 Bq) equals one nuclear disintegration or decay event per second." },
+                { q: "Natural sources of background radiation include cosmic rays and:", options: ["X-ray machines", "Nuclear power plant emissions", "Terrestrial radioactive minerals in rocks and soil (e.g., Radon)", "Cellular phone towers"], answer: 2, explanation: "Naturally occurring radioactive elements like Radon gas and Uranium in Earth's crust provide background radiation." },
+                { q: "Which radioisotope is used in industrial food irradiation to kill bacteria and extend shelf life?", options: ["Cobalt-60", "Phosphorus-32", "Radium-226", "Plutonium-239"], answer: 0, explanation: "Gamma rays emitted by Cobalt-60 eliminate microbes and pathogens in food without making food radioactive." },
+                { q: "How does an electric field affect a beam of gamma rays?", options: ["Deflects rays toward positive plate", "Deflects rays toward negative plate", "Rays pass straight through without deflection", "Reflects rays 180 degrees"], answer: 2, explanation: "Gamma rays are uncharged electromagnetic photons, remaining completely undeflected by electric or magnetic fields." },
+                { q: "A radiation worker wears a film badge dosimeter primarily to:", options: ["Block dangerous cosmic radiation", "Monitor cumulative exposure to ionizing radiation over time", "Sterilize clothing in laboratories", "Increase radioactive absorption"], answer: 1, explanation: "Film badges contain photographic film that darkens proportionally to absorbed radiation dose, monitoring worker safety." },
+                { q: "Nuclear fission inside commercial reactors involves splitting heavy atomic nuclei such as:", options: ["Hydrogen-1", "Uranium-235", "Helium-4", "Carbon-12"], answer: 1, explanation: "Uranium-235 absorbs neutrons and undergoes nuclear fission, splitting into lighter elements and releasing immense energy." },
+                { q: "What process powers the Sun and stars by combining light atomic nuclei into heavier ones?", options: ["Nuclear Fission", "Nuclear Fusion", "Alpha Decay", "Electron Capture"], answer: 1, explanation: "Nuclear fusion forces hydrogen nuclei together under high temperature and pressure to form helium, releasing vast energy." },
+                { q: "Which safety precautions must be observed when handling radioactive sources in a laboratory?", options: ["Handle with bare hands for speed", "Use long-handled forceps and store sources in thick lead containers", "Keep sources near heat sources", "Dispose in standard waste bins"], answer: 1, explanation: "Lead shielding blocks radiation, while long forceps increase distance to minimize biological dose rate." },
+                { q: "If a radioactive sample decays from 1000 Bq to 125 Bq in 12 hours, what is its half-life?", options: ["2 hours", "4 hours", "3 hours", "6 hours"], answer: 1, explanation: "$1000 \\rightarrow 500 \\rightarrow 250 \\rightarrow 125$ represents 3 half-lives. 12 hours / 3 = 4 hours half-life." }
+            ],
+            9: [
+                { q: "What layer of the Sun's atmosphere is visible from Earth during a total solar eclipse as a white halo?", options: ["Photosphere", "Chromosphere", "Corona", "Core"], answer: 2, explanation: "The Corona is the outermost region of solar atmosphere, extending millions of kilometers into space and visible during eclipses." },
+                { q: "Darker, cooler regions on the Sun's photosphere caused by intense localized magnetic fields are called:", options: ["Solar flares", "Sunspots", "Prominences", "Coronal mass ejections"], answer: 1, explanation: "Sunspots are temporary surface regions with reduced temperatures caused by magnetic flux inhibiting convection." },
+                { q: "What stream of charged plasma particles continuously flows outward from the solar corona into space?", options: ["Solar wind", "Cosmic background rays", "Geomagnetic currents", "Interstellar dust"], answer: 0, explanation: "Solar wind consists of high-energy protons and electrons ejected continuously from the Sun's corona throughout the solar system." },
+                { q: "Which phenomenon involves a sudden, violent explosion on the solar surface releasing massive electromagnetic energy?", options: ["Prominence", "Solar flare", "Granulation", "Sunspot cycle"], answer: 1, explanation: "Solar flares are intense localized explosions releasing electromagnetic radiation across all wavelengths." },
+                { q: "Coronal Mass Ejections (CMEs) pose significant hazards to Earth because they emit immense clouds of:", options: ["Cold nitrogen gas", "Magnetized solar plasma and high-energy particles", "Heavy radioactive metals", "Dust and icy cometary debris"], answer: 1, explanation: "CMEs blast billions of tons of magnetized plasma into space; striking Earth's magnetosphere triggers severe geomagnetic storms." },
+                { q: "The periodic fluctuation in sunspot numbers occurring approximately every 11 years is termed the:", options: ["Precession cycle", "Solar cycle / Sunspot cycle", "Milankovitch cycle", "Orbital resonance"], answer: 1, explanation: "The Solar Cycle averages 11 years between minimum and maximum sunspot activity periods." },
+                { q: "Luminous displays of light observed in high-latitude polar skies (Aurora Borealis and Australis) result from:", options: ["Reflection of sunlight off polar ice caps", "Solar wind particles exciting gas molecules in upper atmosphere", "Volcanic ash ionizing ionosphere", "Moonlight diffracting through cloud crystals"], answer: 1, explanation: "Auroras occur when energetic solar wind particles strike oxygen and nitrogen atoms in upper thermosphere, releasing light." },
+                { q: "Earth's natural defense shield deflecting harmful charged particles from solar wind is the:", options: ["Ozone layer", "Stratosphere", "Magnetosphere", "Ionospheric troposphere"], answer: 2, explanation: "Earth's magnetosphere, generated by its liquid iron core dynamo, diverts most solar wind plasma safely around Earth." },
+                { q: "How can severe space weather events like geomagnetic storms impact human technological infrastructure?", options: ["Disrupt satellite communications, GPS navigation, and induce power grid blackouts", "Cause earthquakes and tsunamis", "Destroy ozone molecules directly in troposphere", "Increase sea level instantly"], answer: 0, explanation: "Geomagnetic storms induce stray currents in power lines, damage satellite electronics, and disrupt ionospheric radio signals." },
+                { q: "What is the visible surface layer of the Sun emitting light and heat called?", options: ["Corona", "Chromosphere", "Photosphere", "Core"], answer: 2, explanation: "The photosphere (5,500°C) is the visible surface layer from which most solar radiation escapes." },
+                { q: "Which solar event forms dense, arch-like loops of cool plasma trapped along magnetic lines above the surface?", options: ["Solar prominence", "Solar flare", "Solar wind stream", "Granule"], answer: 0, explanation: "Prominences are huge loops of glowing plasma anchored in the photosphere extending far into the corona." },
+                { q: "Granulation visible on the solar photosphere is caused by:", options: ["Nuclear fusion in surface layers", "Convective currents of rising hot plasma and falling cooler plasma", "Meteorite impacts on solar crust", "Gravitational tidal forces"], answer: 1, explanation: "Granules are tops of convection cells where hot plasma rises in the center and cools as it sinks along edges." },
+                { q: "At what solar core temperature does nuclear fusion of hydrogen into helium occur?", options: ["5,500 °C", "100,000 °C", "15,000,000 °C", "1,000,000 °C"], answer: 2, explanation: "Extreme gravitational pressure at the solar core sustains temperatures of approximately 15 million °C required for hydrogen fusion." },
+                { q: "Which satellite system is most vulnerable to ionospheric disturbance during space weather events?", options: ["Submarine cable networks", "Global Positioning System (GPS) and GNSS satellites", "Underground fiber optic links", "FM radio relay towers"], answer: 1, explanation: "Solar particle storms ionize the upper atmosphere, distorting radio signals passing between GPS satellites and receivers." },
+                { q: "The solar atmospheric layer located directly above the photosphere, exhibiting a reddish glow during eclipses, is the:", options: ["Core", "Chromosphere", "Radiative zone", "Convective zone"], answer: 1, explanation: "The chromosphere is a thin atmospheric layer above the photosphere characterized by hydrogen-alpha red emission." },
+                { q: "Geomagnetic induced currents (GICs) generated during solar storms can severely damage:", options: ["High-voltage electrical power transformers", "Deep sea concrete pipelines", "Wind turbine blades", "Fiber optic glass cables"], answer: 0, explanation: "GICs flow through ground-connected electrical grids, causing magnetic saturation and destructive overheating of high-voltage transformers." },
+                { q: "During Solar Maximum, what condition characterizes the Sun?", options: ["Sunspots, solar flares, and CMEs occur at peak frequency", "Sunspots disappear completely", "Solar wind stops flowing", "Surface temperature cools down by half"], answer: 0, explanation: "Solar Maximum represents the peak of the 11-year solar cycle, marked by frequent sunspots, flares, and CMEs." },
+                { q: "Which gas dominates the chemical composition of the Sun by mass (~73%)?", options: ["Helium", "Oxygen", "Hydrogen", "Carbon"], answer: 2, explanation: "Hydrogen accounts for roughly 73% of solar mass, with helium making up about 25%." },
+                { q: "Space weather monitoring satellites are strategic positioned at which stable gravitational location between Earth and Sun?", options: ["Geostationary orbit", "Low Earth Orbit (LEO)", "Lagrange Point 1 (L1)", "Lunar orbit"], answer: 2, explanation: "Lagrange Point 1 (L1) provides continuous, uninterrupted line-of-sight observation of the Sun 1.5 million km upstream." },
+                { q: "What color aurora is typically emitted when solar particles collide with oxygen molecules at lower ionospheric altitudes (~100 km)?", options: ["Deep violet", "Emerald green", "Crimson red", "Bright yellow"], answer: 1, explanation: "Excitation of atomic oxygen at lower thermosphere altitudes produces the characteristic bright green auroral line (557.7 nm)." }
+            ],
+            10: [
+                { q: "Who was the first human astronaut to orbit the Earth in space aboard Vostok 1 in 1961?", options: ["Neil Armstrong", "Yuri Gagarin", "Buzz Aldrin", "John Glenn"], answer: 1, explanation: "Soviet cosmonaut Yuri Gagarin became the first human in outer space, completing an orbit on April 12, 1961." },
+                { q: "Which historical space mission achieved the first successful crewed lunar landing on July 20, 1969?", options: ["Apollo 8", "Apollo 11", "Gemini 4", "Sputnik 1"], answer: 1, explanation: "NASA's Apollo 11 landed astronauts Neil Armstrong and Buzz Aldrin on the lunar surface (Sea of Tranquility)." },
+                { q: "What type of astronomical telescope uses curved mirrors to gather and focus light from distant celestial objects?", options: ["Refracting telescope", "Reflecting telescope", "Radio telescope", "Spectroscope"], answer: 1, explanation: "Reflecting telescopes utilize concave parabolic primary mirrors to collect light without chromatic aberration." },
+                { q: "Which space observatory, launched in 2021, uses high-resolution infrared detectors to view early galaxies?", options: ["Hubble Space Telescope", "James Webb Space Telescope (JWST)", "Kepler Space Telescope", "Chandra X-ray Observatory"], answer: 1, explanation: "JWST operates in infrared wavelengths to observe faint, redshifted light from early universe galaxies." },
+                { q: "What primary operational advantage do orbital space telescopes possess over ground-based observatories?", options: ["They are cheaper to build", "They operate above Earth's atmospheric distortion and light pollution", "They never experience solar radiation", "They are larger than ground telescopes"], answer: 1, explanation: "Space-based telescopes avoid atmospheric blurring, light absorption, and weather interference." },
+                { q: "What was Sputnik 1, launched by the Soviet Union in 1957?", options: ["First human-crewed space station", "First artificial satellite successfully placed in Earth orbit", "First lunar rover", "First space shuttle"], answer: 1, explanation: "Sputnik 1 was Earth's first artificial satellite, marking the beginning of the Space Age." },
+                { q: "Which robotic exploration instrument is designed specifically to land and traverse planetary surfaces like Mars?", options: ["Space probe", "Rover", "Orbiter", "Space station"], answer: 1, explanation: "Rovers (e.g., Curiosity, Perseverance) are motorized vehicles that land and drive on planetary surfaces to analyze rocks and soil." },
+                { q: "International Space Station (ISS) orbits Earth in which altitude band?", options: ["Low Earth Orbit (LEO, ~400 km)", "Geostationary Orbit (GEO, 35,786 km)", "Medium Earth Orbit (MEO)", "Deep space orbit"], answer: 0, explanation: "The ISS maintains a Low Earth Orbit at an average altitude of approximately 400 kilometers." },
+                { q: "Which technology, originally developed for space exploration, is now widely used in civilian daily life?", options: ["Global Positioning System (GPS) and satellite navigation", "Internal combustion engines", "Steam turbines", "Incandescent bulbs"], answer: 0, explanation: "Satellite positioning infrastructure developed for aerospace applications is now essential for civilian navigation." },
+                { q: "Remote sensing technology aboard Earth observation satellites uses sensors to gather environmental data by measuring:", options: ["Subsurface seismic soundings only", "Reflected and emitted electromagnetic radiation", "Atmospheric air pressure directly", "Oceanic depth using anchors"], answer: 1, explanation: "Remote sensing captures multispectral optical, infrared, and microwave radiation reflected from Earth's surface." },
+                { q: "Which Malaysia-owned satellite series provides Earth observation and remote sensing data?", options: ["MEASAT-1", "TiungSAT-1 and RazakSAT", "Binariang-1", "ASTRO-1"], answer: 1, explanation: "TiungSAT-1 and RazakSAT were microsatellites developed for Malaysian remote sensing and Earth observation." },
+                { q: "What physical force must a multi-stage rocket overcome to achieve orbital velocity from Earth's surface?", options: ["Centrifugal force", "Earth's gravitational pull", "Solar radiation pressure", "Magnetic force"], answer: 1, explanation: "Rockets must generate sufficient thrust exceeding total weight to overcome Earth's gravitational force." },
+                { q: "What is escape velocity from Earth's surface (~11.2 km/s)?", options: ["Minimum speed required for an object to break free from Earth's gravitational field without further propulsion", "Speed required to maintain circular low orbit", "Speed of sound in upper atmosphere", "Speed of solar wind"], answer: 0, explanation: "Escape velocity (~11.2 km/s) is the speed needed to break free from a planet's gravitational pull." },
+                { q: "Radio astronomy observes celestial phenomena by detecting which region of the electromagnetic spectrum?", options: ["Gamma rays", "Radio waves", "Ultraviolet light", "Visible spectrum"], answer: 1, explanation: "Radio telescopes collect long-wavelength radio waves emitted by cosmic sources like pulsars, quasars, and gas clouds." },
+                { q: "Which uncrewed spacecraft trajectory design flies past multiple planets to perform scientific reconnaissance without entering orbit?", options: ["Lander", "Flyby probe", "Sample return capsule", "Space station"], answer: 1, explanation: "Flyby probes (e.g., Voyager 1 & 2) follow trajectories that pass near celestial bodies to gather data while continuing into deep space." },
+                { q: "Which planet in our solar system has been surveyed extensively by rovers including Spirit, Opportunity, Curiosity, and Perseverance?", options: ["Venus", "Mars", "Jupiter", "Mercury"], answer: 1, explanation: "Mars has been explored by multiple robotic rovers to search for signs of ancient water and habitability." },
+                { q: "Geostationary satellites remain fixed above a specific geographic point on Earth's equator because their orbital period equals:", options: ["12 hours", "24 hours (one Earth rotation)", "30 days", "90 minutes"], answer: 1, explanation: "Geostationary satellites orbit at 35,786 km with a period matching Earth's 24-hour rotation, remaining stationary relative to the ground." },
+                { q: "What safety hazard is posed by dead human-made objects, upper rocket stages, and satellite fragments orbiting Earth?", options: ["Solar flares", "Space debris / Orbital junk", "Atmospheric depletion", "Cosmic radiation spikes"], answer: 1, explanation: "Space debris traveling at high orbital velocities (~7.8 km/s) poses severe collision risks to operational satellites and space stations." },
+                { q: "Who was the first Malaysian astronaut ('Angkasawan') to fly to the International Space Station aboard Soyuz TMA-11 in 2007?", options: ["Dr. Sheikh Muszaphar Shukor", "Dato. Faiz Khaleed", "Tan Sri Bernard Giluk", "Dr. Mazlan Othman"], answer: 0, explanation: "Dr. Sheikh Muszaphar Shukor became Malaysia's first astronaut when he launched to the ISS on October 10, 2007." },
+                { q: "What propellants are commonly used in liquid-fueled rocket engines like the Saturn V or Space Shuttle main engines?", options: ["Liquid Hydrogen ($LH_2$) fuel and Liquid Oxygen ($LOX$) oxidizer", "Kerosene and Nitrates", "Solid Carbon and compressed air", "Uranium pellets and water"], answer: 0, explanation: "Cryogenic Liquid Hydrogen and Liquid Oxygen offer high specific impulse efficiency for rocket propulsion." }
+            ]
+        };
+
+        // APPLICATION STATE VARIABLES
+        let currentStudentName = "";
+        let currentModuleKey = ""; // "ALL" or chapter id (1-10)
+        let activeQuestions = [];
+        let userAnswers = {}; // questionIndex -> selectedOptionIndex
+        let currentQuestionIndex = 0;
+        let timerInterval = null;
+        let elapsedSeconds = 0;
+
+        // INITIALIZATION ON DOM READY
+        document.addEventListener("DOMContentLoaded", () => {
+            renderChapterLobbyGrid();
+            loadLeaderboard();
+        });
+
+        // RENDER LOBBY CHAPTER CARDS
+        function renderChapterLobbyGrid() {
+            const grid = document.getElementById("chapterGrid");
+            grid.innerHTML = "";
+
+            CHAPTERS.forEach(ch => {
+                const count = QUESTION_BANK[ch.id] ? QUESTION_BANK[ch.id].length : 0;
+                const card = document.createElement("div");
+                card.className = "bg-white border border-slate-200 rounded-lg p-5 shadow-sm hover:border-blue-500 hover:shadow-md transition flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <span class="text-[10px] font-bold font-mono text-slate-400 uppercase tracking-widest block mb-1">Module ${ch.id}</span>
+                        <h4 class="text-base font-bold text-slate-900 leading-snug">${ch.title}</h4>
+                        <p class="text-xs text-slate-500 mt-2 font-mono">${count} Assessment Items</p>
+                    </div>
+                    <button onclick="startQuiz(${ch.id})" class="mt-5 w-full bg-slate-900 hover:bg-blue-600 text-white text-xs font-semibold py-2 rounded transition">
+                        Select Module
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // START QUIZ SESSION
+        function startQuiz(moduleId) {
+            const nameInput = document.getElementById("studentName").value.trim();
+            const nameError = document.getElementById("nameError");
+
+            if (!nameInput) {
+                nameError.classList.remove("hidden");
+                document.getElementById("studentName").focus();
+                return;
+            }
+            nameError.classList.add("hidden");
+            currentStudentName = nameInput;
+            currentModuleKey = moduleId;
+
+            // Prepare Question Set
+            if (moduleId === 'ALL') {
+                // Full Syllabus Mode: Sample 50 randomized questions across all 10 chapters
+                let pool = [];
+                for (let id in QUESTION_BANK) {
+                    QUESTION_BANK[id].forEach(q => {
+                        pool.push({ ...q, chapterId: id, chapterTitle: CHAPTERS.find(c => c.id == id).title });
+                    });
+                }
+                // Shuffle pool
+                pool.sort(() => Math.random() - 0.5);
+                activeQuestions = pool.slice(0, 50);
+            } else {
+                // Chapter Mode: 20 Questions
+                const ch = CHAPTERS.find(c => c.id === moduleId);
+                activeQuestions = QUESTION_BANK[moduleId].map(q => ({
+                    ...q,
+                    chapterId: moduleId,
+                    chapterTitle: ch.title
+                }));
+            }
+
+            // Reset State
+            userAnswers = {};
+            currentQuestionIndex = 0;
+            elapsedSeconds = 0;
+
+            // Update UI Views
+            document.getElementById("lobbyView").classList.add("hidden");
+            document.getElementById("resultsView").classList.add("hidden");
+            document.getElementById("quizView").classList.remove("hidden");
+
+            // Header info
+            if (moduleId === 'ALL') {
+                document.getElementById("quizModuleBadge").innerText = "Full Exam";
+                document.getElementById("quizTitle").innerText = "Full Syllabus Comprehensive Evaluation Mode";
+            } else {
+                const ch = CHAPTERS.find(c => c.id === moduleId);
+                document.getElementById("quizModuleBadge").innerText = `Module ${ch.id}`;
+                document.getElementById("quizTitle").innerText = ch.title;
+            }
+
+            // Start Timer
+            clearInterval(timerInterval);
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                elapsedSeconds++;
+                updateTimerDisplay();
+            }, 1000);
+
+            // Render Palette and First Question
+            renderPalette();
+            displayQuestion(currentQuestionIndex);
+        }
+
+        // TIMER DISPLAY
+        function updateTimerDisplay() {
+            const m = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+            const s = (elapsedSeconds % 60).toString().padStart(2, '0');
+            document.getElementById("timerDisplay").innerText = `${m}:${s}`;
+        }
+
+        // RENDER PALETTE NAVIGATION
+        function renderPalette() {
+            const grid = document.getElementById("paletteGrid");
+            grid.innerHTML = "";
+
+            activeQuestions.forEach((q, idx) => {
+                const btn = document.createElement("button");
+                btn.id = `palette-btn-${idx}`;
+                btn.innerText = (idx + 1).toString().padStart(2, '0');
+                btn.className = getPaletteBtnClass(idx);
+                btn.onclick = () => displayQuestion(idx);
+                grid.appendChild(btn);
+            });
+            updateProgress();
+        }
+
+        function getPaletteBtnClass(idx) {
+            const isCurrent = idx === currentQuestionIndex;
+            const isAnswered = userAnswers.hasOwnProperty(idx);
+
+            if (isCurrent) {
+                return "py-1.5 text-xs font-mono font-bold bg-blue-600 text-white rounded border border-blue-700 shadow-sm";
+            } else if (isAnswered) {
+                return "py-1.5 text-xs font-mono font-semibold bg-slate-800 text-white rounded border border-slate-900";
+            } else {
+                return "py-1.5 text-xs font-mono font-medium bg-slate-50 text-slate-700 hover:bg-slate-100 rounded border border-slate-200";
+            }
+        }
+
+        function updatePaletteButtonStyles() {
+            activeQuestions.forEach((_, idx) => {
+                const btn = document.getElementById(`palette-btn-${idx}`);
+                if (btn) btn.className = getPaletteBtnClass(idx);
+            });
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const answeredCount = Object.keys(userAnswers).length;
+            document.getElementById("progressDisplay").innerText = `${answeredCount} / ${activeQuestions.length}`;
+        }
+
+        // DISPLAY QUESTION AT INDEX
+        function displayQuestion(index) {
+            if (index < 0 || index >= activeQuestions.length) return;
+            currentQuestionIndex = index;
+
+            const qData = activeQuestions[index];
+            document.getElementById("questionNumberLabel").innerText = `Question ${(index + 1).toString().padStart(2, '0')} of ${activeQuestions.length.toString().padStart(2, '0')}`;
+            document.getElementById("questionChapterLabel").innerText = qData.chapterTitle;
+            document.getElementById("questionText").innerText = qData.q;
+
+            const optionsContainer = document.getElementById("optionsContainer");
+            optionsContainer.innerHTML = "";
+
+            const prefixes = ["A", "B", "C", "D"];
+            qData.options.forEach((optText, optIdx) => {
+                const isSelected = userAnswers[index] === optIdx;
+                const optDiv = document.createElement("div");
+                optDiv.onclick = () => selectOption(optIdx);
+                optDiv.className = `p-3.5 border rounded-lg cursor-pointer transition flex items-center space-x-3 ${
+                    isSelected 
+                    ? 'bg-blue-50/80 border-blue-600 text-slate-900 font-medium shadow-sm' 
+                    : 'bg-slate-50/50 border-slate-200 text-slate-700 hover:bg-slate-100/80'
+                }`;
+
+                optDiv.innerHTML = `
+                    <span class="w-6 h-6 rounded flex items-center justify-center font-mono text-xs font-bold ${
+                        isSelected ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-700'
+                    }">${prefixes[optIdx]}</span>
+                    <span class="text-sm leading-snug">${optText}</span>
+                `;
+                optionsContainer.appendChild(optDiv);
+            });
+
+            // Update Navigation Buttons
+            document.getElementById("prevBtn").disabled = (index === 0);
+            document.getElementById("prevBtn").classList.toggle("opacity-50", index === 0);
+
+            if (index === activeQuestions.length - 1) {
+                document.getElementById("nextBtn").classList.add("hidden");
+                document.getElementById("submitBtn").classList.remove("hidden");
+            } else {
+                document.getElementById("nextBtn").classList.remove("hidden");
+                document.getElementById("submitBtn").classList.add("hidden");
+            }
+
+            updatePaletteButtonStyles();
+        }
+
+        // OPTION SELECTION
+        function selectOption(optIdx) {
+            userAnswers[currentQuestionIndex] = optIdx;
+            displayQuestion(currentQuestionIndex);
+        }
+
+        // NAVIGATE NEXT/PREV
+        function navigateQuestion(direction) {
+            const target = currentQuestionIndex + direction;
+            if (target >= 0 && target < activeQuestions.length) {
+                displayQuestion(target);
+            }
+        }
+
+        // CONFIRM AND SUBMIT
+        function confirmSubmission() {
+            const unanswered = activeQuestions.length - Object.keys(userAnswers).length;
+            if (unanswered > 0) {
+                if (!confirm(`You have ${unanswered} unanswered question(s). Are you sure you wish to finalize and submit?`)) {
+                    return;
+                }
+            } else {
+                if (!confirm("Are you sure you want to submit your examination answers?")) {
+                    return;
+                }
+            }
+            finalizeAssessment();
+        }
+
+        // FINALIZE ASSESSMENT & COMPUTE RESULTS
+        function finalizeAssessment() {
+            clearInterval(timerInterval);
+
+            let correctCount = 0;
+            activeQuestions.forEach((q, idx) => {
+                if (userAnswers[idx] === q.answer) {
+                    correctCount++;
+                }
+            });
+
+            const total = activeQuestions.length;
+            const percentage = Math.round((correctCount / total) * 100);
+            const m = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+            const s = (elapsedSeconds % 60).toString().padStart(2, '0');
+            const formattedTime = `${m}:${s}`;
+
+            // Hide Quiz, Show Results View
+            document.getElementById("quizView").classList.add("hidden");
+            document.getElementById("resultsView").classList.remove("hidden");
+
+            // Populate Summary Metrics
+            document.getElementById("resultCandidateName").innerText = currentStudentName;
+            document.getElementById("resultModuleTitle").innerText = currentModuleKey === 'ALL' 
+                ? "Full Syllabus Mode" 
+                : CHAPTERS.find(c => c.id === currentModuleKey).title;
+
+            document.getElementById("metricScore").innerText = `${correctCount} / ${total}`;
+            document.getElementById("metricPercentage").innerText = `${percentage}%`;
+            document.getElementById("metricAccuracy").innerText = `${percentage}%`;
+            document.getElementById("metricTime").innerText = formattedTime;
+
+            // UASA Grade Computation
+            let grade = "F";
+            let label = "Gagal (Fail)";
+            let desc = "Candidate has not met the minimum required academic standards. Comprehensive revision recommended.";
+
+            if (percentage >= 80) {
+                grade = "A";
+                label = "Cemerlang (Excellent)";
+                desc = "Outstanding performance demonstrating thorough mastery of Form 3 KSSM Science concepts.";
+            } else if (percentage >= 70) {
+                grade = "B";
+                label = "Kepujian (Good)";
+                desc = "Strong academic performance showing clear understanding across most core learning areas.";
+            } else if (percentage >= 60) {
+                grade = "C";
+                label = "Memuaskan (Satisfactory)";
+                desc = "Satisfactory grasp of fundamental science concepts, though some areas require consolidation.";
+            } else if (percentage >= 50) {
+                grade = "D";
+                label = "Mencapai Tahap Minimum (Pass)";
+                desc = "Meets the minimum passing threshold. Targeted revision is advised on weak topics.";
+            } else if (percentage >= 40) {
+                grade = "E";
+                label = "Belum Mencapai Tahap Minimum (Weak)";
+                desc = "Below standard minimum requirement. Immediate structured remediation is strongly recommended.";
+            }
+
+            document.getElementById("uasaGrade").innerText = `Grade ${grade}`;
+            document.getElementById("uasaLabel").innerText = `(${label})`;
+            document.getElementById("uasaDescription").innerText = desc;
+
+            // Save Entry to Leaderboard
+            saveLeaderboardEntry({
+                name: currentStudentName,
+                module: currentModuleKey === 'ALL' ? 'Full Exam' : `Ch ${currentModuleKey}`,
+                score: `${correctCount}/${total}`,
+                pct: percentage,
+                time: formattedTime,
+                timestamp: new Date().toISOString()
+            });
+
+            // Render Detailed Review Breakdown
+            renderReviewBreakdown();
+        }
+
+        // RENDER ITEM REVIEW
+        function renderReviewBreakdown() {
+            const container = document.getElementById("reviewContainer");
+            container.innerHTML = "";
+
+            const prefixes = ["A", "B", "C", "D"];
+
+            activeQuestions.forEach((q, idx) => {
+                const userSelected = userAnswers[idx];
+                const isCorrect = userSelected === q.answer;
+
+                const item = document.createElement("div");
+                item.className = `border rounded-lg p-5 ${
+                    isCorrect ? 'border-green-200 bg-green-50/20' : 'border-red-200 bg-red-50/20'
+                }`;
+
+                let optionsHtml = '<div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">';
+                q.options.forEach((opt, optIdx) => {
+                    let optStyle = "bg-white border-slate-200 text-slate-700";
+                    if (optIdx === q.answer) {
+                        optStyle = "bg-green-100 border-green-400 text-green-900 font-medium";
+                    } else if (optIdx === userSelected && !isCorrect) {
+                        optStyle = "bg-red-100 border-red-400 text-red-900 font-medium";
+                    }
+
+                    optionsHtml += `
+                        <div class="p-2.5 border rounded text-xs flex items-center space-x-2 ${optStyle}">
+                            <span class="font-bold font-mono uppercase">${prefixes[optIdx]}.</span>
+                            <span>${opt}</span>
+                        </div>
+                    `;
+                });
+                optionsHtml += '</div>';
+
+                item.innerHTML = `
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <span class="text-[10px] font-bold font-mono uppercase px-2 py-0.5 rounded ${
+                                isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }">
+                                ${isCorrect ? 'Correct Answer' : 'Incorrect Answer'}
+                            </span>
+                            <h4 class="text-sm font-bold text-slate-900 mt-2">
+                                Q${idx + 1}. ${q.q}
+                            </h4>
+                        </div>
+                    </div>
+                    ${optionsHtml}
+                    <div class="mt-3 bg-white border border-slate-200 p-3 rounded text-xs text-slate-600">
+                        <strong class="text-slate-800 block mb-1">Academic Explanation:</strong>
+                        ${q.explanation}
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // RETURN TO DASHBOARD LOBBY
+        function returnToLobby() {
+            document.getElementById("resultsView").classList.add("hidden");
+            document.getElementById("quizView").classList.add("hidden");
+            document.getElementById("lobbyView").classList.remove("hidden");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // MODAL TOGGLE HELPER
+        function toggleModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.toggle("hidden");
+        }
+
+        // LEADERBOARD STORAGE & API LOGIC
+        function saveLeaderboardEntry(entry) {
+            const binId = localStorage.getItem("kssm_jsonbin_id");
+            const apiKey = localStorage.getItem("kssm_jsonbin_key");
+
+            if (binId && apiKey) {
+                // Save to JSONBin API
+                fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+                    method: 'GET',
+                    headers: { 'X-Master-Key': apiKey }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    let list = Array.isArray(data.record) ? data.record : [];
+                    list.push(entry);
+                    return fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': apiKey
+                        },
+                        body: JSON.stringify(list)
+                    });
+                })
+                .then(() => loadLeaderboard())
+                .catch(err => {
+                    console.error("JSONBin Sync Error, falling back to local storage:", err);
+                    saveLocalLeaderboard(entry);
+                });
+            } else {
+                saveLocalLeaderboard(entry);
+            }
+        }
+
+        function saveLocalLeaderboard(entry) {
+            let list = JSON.parse(localStorage.getItem("kssm_local_leaderboard") || "[]");
+            list.push(entry);
+            localStorage.setItem("kssm_local_leaderboard", JSON.stringify(list));
+            loadLeaderboard();
+        }
+
+        function loadLeaderboard() {
+            const binId = localStorage.getItem("kssm_jsonbin_id");
+            const apiKey = localStorage.getItem("kssm_jsonbin_key");
+            const sourceLabel = document.getElementById("leaderboardSource");
+
+            if (binId && apiKey) {
+                sourceLabel.innerText = "Storage: Global JSONBin Database";
+                fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+                    headers: { 'X-Master-Key': apiKey }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    renderLeaderboardTable(data.record || []);
+                })
+                .catch(err => {
+                    console.error("Failed loading remote leaderboard:", err);
+                    renderLeaderboardTable(JSON.parse(localStorage.getItem("kssm_local_leaderboard") || "[]"));
+                });
+            } else {
+                sourceLabel.innerText = "Storage: Local Device Storage";
+                renderLeaderboardTable(JSON.parse(localStorage.getItem("kssm_local_leaderboard") || "[]"));
+            }
+        }
+
+        function renderLeaderboardTable(list) {
+            const tbody = document.getElementById("leaderboardBody");
+            const emptyMsg = document.getElementById("leaderboardEmpty");
+            tbody.innerHTML = "";
+
+            if (!list || list.length === 0) {
+                emptyMsg.classList.remove("hidden");
+                return;
+            }
+            emptyMsg.classList.add("hidden");
+
+            // Sort by percentage descending, then time ascending
+            list.sort((a, b) => b.pct - a.pct);
+
+            list.slice(0, 50).forEach((item, rank) => {
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="px-4 py-2.5 font-bold font-mono text-slate-700">#${rank + 1}</td>
+                    <td class="px-4 py-2.5 font-semibold text-slate-900">${escapeHtml(item.name)}</td>
+                    <td class="px-4 py-2.5 font-mono text-slate-600">${escapeHtml(item.module)}</td>
+                    <td class="px-4 py-2.5 font-bold text-slate-900">${item.score} (${item.pct}%)</td>
+                    <td class="px-4 py-2.5 font-mono text-slate-600">${item.time}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function saveApiConfig() {
+            const binId = document.getElementById("cfgBinId").value.trim();
+            const apiKey = document.getElementById("cfgApiKey").value.trim();
+
+            if (binId && apiKey) {
+                localStorage.setItem("kssm_jsonbin_id", binId);
+                localStorage.setItem("kssm_jsonbin_key", apiKey);
+                document.getElementById("apiConfigStatus").classList.remove("hidden");
+                loadLeaderboard();
+                setTimeout(() => {
+                    document.getElementById("apiConfigStatus").classList.add("hidden");
+                    toggleModal("vercelModal");
+                }, 1500);
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>
